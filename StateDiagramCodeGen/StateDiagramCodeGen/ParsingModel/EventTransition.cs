@@ -1,6 +1,6 @@
 ﻿namespace StateDiagramCodeGen.ParsingModel
 {
-    public sealed class Transition
+    public sealed class EventTransition
     {
         public string Source { get; }
         public string Destination { get; }
@@ -8,7 +8,7 @@
         public string ActionName { get; }
         public string GuardName { get; }
 
-        public Transition(
+        public EventTransition(
             string source, 
             string destination, 
             string eventName = "", 
