@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Sprache;
 
 namespace StateDiagramCodeGen.ParsingModel
@@ -30,12 +26,34 @@ namespace StateDiagramCodeGen.ParsingModel
 
         private static readonly Parser<string> Arrow = Parse.String("-->").Token().Text();
 
+        private static readonly Parser<string> Guard =
+            from leading in Parse.WhiteSpace.Many()
+            from openGuard in Parse.Char('[')
+            from guard in Parse.CharExcept(new[] { '[', ']' }).AtLeastOnce().Text()
+            from closeGuard in Parse.Char(']')
+            from trailing in Parse.WhiteSpace.Many()
+            select guard;
+
+        private static readonly Parser<string> Action =
+            from leading in Parse.WhiteSpace.Many()
+            from openGuard in Parse.Char('/')
+            from action in Parse.CharExcept(new[] { '/' }).AtLeastOnce().Text()
+            from trailing in Parse.WhiteSpace.Many()
+            select action;
+
         public static readonly Parser<EventTransition> EventTransition =
             from source in Identifier
             from arrow in Arrow
             from destination in Identifier
             from colon in Parse.Char(':')
             from eventName in Identifier
-            select new EventTransition(source, destination, eventName);
+            from guardFunction in Guard.Optional()
+            from actionFunction in Action.Optional()
+            select new EventTransition(
+                source,
+                destination,
+                eventName,
+                actionFunction.GetOrElse(string.Empty),
+                guardFunction.GetOrElse(string.Empty));
     }
 }
