@@ -15,6 +15,20 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(vertex.Name, Is.EqualTo("Alpha"));
         }
 
+        [TestCase("MethodName", "MethodName")]
+        [TestCase("MethodName()", "MethodName")]
+        public void ShouldParseMethodReference(string input, string expected)
+        {
+            Assert.That(PlantUmlParser.MethodReference.Parse(input), Is.EqualTo(expected));
+        }
+
+        [TestCase("Method Name", "MethodName")]
+        [TestCase("A really long method name", "AReallyLongMethodName")]
+        public void ShouldDehumanizeMethodSentence(string input, string expected)
+        {
+            Assert.That(PlantUmlParser.DehumanizedSentence.Parse(input), Is.EqualTo(expected));
+        }
+
         [TestCase("    Alpha --> Beta : Gamma")]
         [TestCase("Alpha-->Beta:Gamma")]
         public void ShouldParseSimpleEventTransition(string input)
@@ -30,7 +44,7 @@ namespace StateDiagramCodeGen.Tests
 
         [TestCase("    Alpha --> Beta : Gamma [Delta]", "Delta")]
         [TestCase("Alpha-->Beta:Gamma[Delta]", "Delta")]
-        [TestCase("    Alpha --> Beta : Gamma [ Some Condition Text ]", "Some Condition Text")]
+        [TestCase("    Alpha --> Beta : Gamma [ Some Condition Text ]", "SomeConditionText")]
         public void ShouldParseGuardedEventTransition(string input, string guard)
         {
             var transition = PlantUmlParser.EventTransition.Parse(input);
@@ -44,7 +58,7 @@ namespace StateDiagramCodeGen.Tests
 
         [TestCase("    Alpha --> Beta : Gamma / Zeta", "Zeta")]
         [TestCase("Alpha-->Beta:Gamma/Zeta", "Zeta")]
-        [TestCase("Alpha --> Beta : Gamma / Some Action Text", "Some Action Text")]
+        [TestCase("Alpha --> Beta : Gamma / Some Action Text", "SomeActionText")]
         public void ShouldParseEventTransitionWithAction(string input, string action)
         {
             var transition = PlantUmlParser.EventTransition.Parse(input);
@@ -56,9 +70,9 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(transition.ActionName, Is.EqualTo(action));
         }
 
-        [TestCase("    Alpha --> Beta : Gamma [Delta] / Zeta","Delta","Zeta")]
+        [TestCase("    Alpha --> Beta : Gamma [Delta] / Zeta", "Delta", "Zeta")]
         [TestCase("Alpha-->Beta:Gamma[Delta]/Zeta", "Delta", "Zeta")]
-        [TestCase("Alpha --> Beta : Gamma [ Guard Text ] / Action Text", "Guard Text", "Action Text")]
+        [TestCase("Alpha --> Beta : Gamma [ Guard Text ] / Action Text", "GuardText", "ActionText")]
         public void ShouldParseGuardedEventTransitionWithAction(string input, string guard, string action)
         {
             var transition = PlantUmlParser.EventTransition.Parse(input);
