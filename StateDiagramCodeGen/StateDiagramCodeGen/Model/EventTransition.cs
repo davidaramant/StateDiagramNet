@@ -1,4 +1,4 @@
-﻿namespace StateDiagramCodeGen.ParsingModel
+﻿namespace StateDiagramCodeGen.Model
 {
     public sealed class EventTransition
     {

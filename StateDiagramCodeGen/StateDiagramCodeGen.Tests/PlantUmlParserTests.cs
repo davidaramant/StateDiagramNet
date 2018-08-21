@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using Sprache;
-using StateDiagramCodeGen.ParsingModel;
+using StateDiagramCodeGen.Model;
 
 namespace StateDiagramCodeGen.Tests
 {

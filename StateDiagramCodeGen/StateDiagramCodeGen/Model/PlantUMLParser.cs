@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Sprache;
 
-namespace StateDiagramCodeGen.ParsingModel
+namespace StateDiagramCodeGen.Model
 {
     public static class PlantUMLParser
     {
