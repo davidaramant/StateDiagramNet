@@ -10,7 +10,7 @@ namespace StateDiagramCodeGen.Tests
         [Test]
         public void ShouldParseSimpleStateDeclaration()
         {
-            var vertex = PlantUMLParser.SimpleStateDeclaration.Parse("state Alpha");
+            var vertex = PlantUmlParser.SimpleStateDeclaration.Parse("state Alpha");
 
             Assert.That(vertex.Name, Is.EqualTo("Alpha"));
         }
@@ -19,7 +19,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("Alpha-->Beta:Gamma")]
         public void ShouldParseSimpleEventTransition(string input)
         {
-            var transition = PlantUMLParser.EventTransition.Parse(input);
+            var transition = PlantUmlParser.EventTransition.Parse(input);
 
             Assert.That(transition.Source, Is.EqualTo("Alpha"));
             Assert.That(transition.Destination, Is.EqualTo("Beta"));
@@ -33,7 +33,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("    Alpha --> Beta : Gamma [ Some Condition Text ]", "Some Condition Text")]
         public void ShouldParseGuardedEventTransition(string input, string guard)
         {
-            var transition = PlantUMLParser.EventTransition.Parse(input);
+            var transition = PlantUmlParser.EventTransition.Parse(input);
 
             Assert.That(transition.Source, Is.EqualTo("Alpha"));
             Assert.That(transition.Destination, Is.EqualTo("Beta"));
@@ -47,7 +47,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("Alpha --> Beta : Gamma / Some Action Text", "Some Action Text")]
         public void ShouldParseEventTransitionWithAction(string input, string action)
         {
-            var transition = PlantUMLParser.EventTransition.Parse(input);
+            var transition = PlantUmlParser.EventTransition.Parse(input);
 
             Assert.That(transition.Source, Is.EqualTo("Alpha"));
             Assert.That(transition.Destination, Is.EqualTo("Beta"));
@@ -61,7 +61,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("Alpha --> Beta : Gamma [ Guard Text ] / Action Text", "Guard Text", "Action Text")]
         public void ShouldParseGuardedEventTransitionWithAction(string input, string guard, string action)
         {
-            var transition = PlantUMLParser.EventTransition.Parse(input);
+            var transition = PlantUmlParser.EventTransition.Parse(input);
 
             Assert.That(transition.Source, Is.EqualTo("Alpha"));
             Assert.That(transition.Destination, Is.EqualTo("Beta"));

@@ -3,24 +3,16 @@ using Sprache;
 
 namespace StateDiagramCodeGen.Model
 {
-    public static class PlantUMLParser
+    public static class PlantUmlParser
     {
-        static readonly CommentParser Comment = new CommentParser("'", "/'", "'/");
-
-        public static readonly Parser<string> StartDiagram = Parse.String("@startuml").Token().Text();
-        public static readonly Parser<string> EndDiagram = Parse.String("@enduml").Token().Text();
-
-        public static readonly Parser<string> StateKeyword = Parse.String("state").Token().Text();
-
-        public static readonly Parser<string> Identifier =
+        public static readonly Parser<string> Identifier = 
             from leading in Parse.WhiteSpace.Many()
-            from first in Parse.Letter.Once()
-            from rest in Parse.LetterOrDigit.Many()
+            from id in Parse.Identifier(Parse.Letter, Parse.LetterOrDigit).Token()
             from trailing in Parse.WhiteSpace.Many()
-            select new string(first.Concat(rest).ToArray());
+            select id;
 
         public static readonly Parser<Vertex> SimpleStateDeclaration =
-            from state in StateKeyword
+            from state in Parse.String("state")
             from stateName in Identifier
             select new Vertex(stateName);
 
@@ -55,5 +47,10 @@ namespace StateDiagramCodeGen.Model
                 eventName,
                 actionFunction.GetOrElse(string.Empty),
                 guardFunction.GetOrElse(string.Empty));
+
+        static readonly CommentParser Comment = new CommentParser("'", "/'", "'/");
+
+        public static readonly Parser<string> StartDiagram = Parse.String("@startuml").Token().Text();
+        public static readonly Parser<string> EndDiagram = Parse.String("@enduml").Token().Text();
     }
 }
