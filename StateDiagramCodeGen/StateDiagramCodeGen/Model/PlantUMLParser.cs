@@ -35,7 +35,20 @@ namespace StateDiagramCodeGen.Model
 
         public static readonly Parser<string> FriendlyMethodReference = DehumanizedSentence.Or(MethodReference);
 
-        private static readonly Parser<string> Arrow = Parse.String("-->").Token().Text();
+        public static readonly Parser<string> Arrow =
+            from start in Parse.Char('-')
+            from qualifier in
+                Parse.String("up")
+                .Or(Parse.String("down"))
+                .Or(Parse.String("left"))
+                .Or(Parse.String("right"))
+                .Or(Parse.String("u"))
+                .Or(Parse.String("d"))
+                .Or(Parse.String("l"))
+                .Or(Parse.String("r"))
+                .Optional()
+            from end in Parse.String("->")
+            select "-->";
 
         private static readonly Parser<string> Guard =
             from leading in Parse.WhiteSpace.Many()
