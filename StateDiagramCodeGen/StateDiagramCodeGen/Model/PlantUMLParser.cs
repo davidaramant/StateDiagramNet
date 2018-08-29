@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
 using Humanizer;
 using Sprache;
+using StateDiagramCodeGen.PlantUMLModel;
 
 namespace StateDiagramCodeGen.Model
 {
@@ -13,9 +14,10 @@ namespace StateDiagramCodeGen.Model
             select id;
 
         public static readonly Parser<Vertex> SimpleStateDeclaration =
-             from state in Parse.String("state")
-             from stateName in Identifier
-             select new Vertex(stateName);
+            from leading in Parse.WhiteSpace.Many()
+            from state in Parse.String("state")
+            from stateName in Identifier
+            select new Vertex(stateName);
 
         public static readonly Parser<string> DehumanizedSentence =
             from sentence in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Text().Token()
@@ -54,11 +56,51 @@ namespace StateDiagramCodeGen.Model
             from guardFunction in Guard.Optional()
             from actionFunction in Action.Optional()
             select new EventTransition(
-                source,
-                destination,
-                eventName,
-                actionFunction.GetOrElse(string.Empty),
-                guardFunction.GetOrElse(string.Empty));
+                source: source,
+                destination: destination,
+                eventName : eventName,
+                guardName: guardFunction.GetOrElse(string.Empty),
+                actionName: actionFunction.GetOrElse(string.Empty));
+
+        public static readonly Parser<EntryAction> EntryAction =
+            from leading in Parse.WhiteSpace.Many()
+            from stateName in Identifier
+            from colon in Parse.Char(':')
+            from ws in Parse.WhiteSpace.Many()
+            from eventName in Parse.String("entry")
+            from guardFunction in Guard.Optional()
+            from actionFunction in Action.Optional()
+            select new EntryAction(
+                stateName:stateName,
+                guardName:guardFunction.GetOrElse(string.Empty), 
+                actionName:actionFunction.GetOrElse(string.Empty));
+
+        public static readonly Parser<ExitAction> ExitAction =
+            from leading in Parse.WhiteSpace.Many()
+            from stateName in Identifier
+            from colon in Parse.Char(':')
+            from ws in Parse.WhiteSpace.Many()
+            from eventName in Parse.String("exit")
+            from guardFunction in Guard.Optional()
+            from actionFunction in Action.Optional()
+            select new ExitAction(
+                stateName:stateName,
+                guardName:guardFunction.GetOrElse(string.Empty), 
+                actionName:actionFunction.GetOrElse(string.Empty));
+
+        public static readonly Parser<InternalTransition> InternalTransition =
+            from leading in Parse.WhiteSpace.Many()
+            from stateName in Identifier
+            from colon in Parse.Char(':')
+            from eventName in Identifier
+            from guardFunction in Guard.Optional()
+            from actionFunction in Action.Optional()
+            select new InternalTransition(
+                stateName:stateName,
+                eventName:eventName, 
+                guardName:guardFunction.GetOrElse(string.Empty), 
+                actionName:actionFunction.GetOrElse(string.Empty));
+
 
         static readonly CommentParser Comment = new CommentParser("'", "/'", "'/");
 
