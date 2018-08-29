@@ -65,7 +65,7 @@ namespace StateDiagramCodeGen.Model
             from trailing in Parse.WhiteSpace.Many()
             select action;
 
-        private static readonly Parser<Transition> DecoratedTransition =
+        private static readonly Parser<ExternalTransition> DecoratedTransition =
             from source in Identifier
             from arrow in Arrow
             from destination in Star.Or(Identifier)
@@ -73,53 +73,53 @@ namespace StateDiagramCodeGen.Model
             from eventName in Identifier.Optional()
             from guardFunction in Guard.Optional()
             from actionFunction in Action.Optional()
-            select new Transition(
+            select new ExternalTransition(
                 source: source,
                 destination: destination,
                 eventName: eventName.GetOrElse(string.Empty),
                 guardName: guardFunction.GetOrElse(string.Empty),
                 actionName: actionFunction.GetOrElse(string.Empty));
 
-        private static readonly Parser<Transition> UndecoratedTransition =
+        private static readonly Parser<ExternalTransition> UndecoratedTransition =
             from source in Identifier
             from arrow in Arrow
             from destination in Star.Or(Identifier)
             from trailing in Parse.WhiteSpace.Many()
-            select new Transition(
+            select new ExternalTransition(
                 source: source,
                 destination: destination,
                 eventName: string.Empty,
                 guardName: string.Empty,
                 actionName: string.Empty);
 
-        private static readonly Parser<Transition> InitialTransitionWithNoAction =
+        private static readonly Parser<ExternalTransition> InitialTransitionWithNoAction =
             from source in Star
             from arrow in Arrow
             from destination in Identifier
-            select new Transition(
+            select new ExternalTransition(
                 source: source,
                 destination: destination,
                 eventName: string.Empty,
                 guardName: string.Empty,
                 actionName: string.Empty);
 
-        private static readonly Parser<Transition> InitialTransitionWithAction =
+        private static readonly Parser<ExternalTransition> InitialTransitionWithAction =
             from source in Star
             from arrow in Arrow
             from destination in Identifier
             from colon in Parse.Char(':')
             from actionFunction in Action
-            select new Transition(
+            select new ExternalTransition(
                 source: source,
                 destination: destination,
                 eventName: string.Empty,
                 guardName: string.Empty,
                 actionName: actionFunction);
 
-        private static readonly Parser<Transition> InitialTransition =
+        private static readonly Parser<ExternalTransition> InitialTransition =
             InitialTransitionWithAction.Or(InitialTransitionWithNoAction);
 
-        public static readonly Parser<Transition> Transition = 
+        public static readonly Parser<ExternalTransition> Transition = 
             InitialTransition.Or(DecoratedTransition).Or(UndecoratedTransition);
 
         public static readonly Parser<EntryAction> EntryAction =

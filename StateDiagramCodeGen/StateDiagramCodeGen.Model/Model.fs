@@ -23,7 +23,7 @@ type ExitAction =
     ActionName : string 
     }
     
-type Transition = 
+type ExternalTransition = 
     { 
     Source : string
     Destination : string
@@ -36,9 +36,9 @@ type State =
     {
     ShortName : string
     LongName : string
-    InternalTransitions : List<InternalTransition>
     EntryActions : List<EntryAction>
     ExitActions : List<ExitAction>
-    Transitions : List<Transition>
+    InternalTransitions : List<InternalTransition>
+    ExternalsTransitions : List<ExternalTransition>
     ChildStates : List<State>
     }
