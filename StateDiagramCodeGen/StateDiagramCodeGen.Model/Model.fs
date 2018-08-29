@@ -1,4 +1,5 @@
 namespace StateDiagramCodeGen.PlantUMLModel
+open System.Collections.Generic
 
 type InternalTransition = 
     { 
@@ -22,11 +23,22 @@ type ExitAction =
     ActionName : string 
     }
     
-type EventTransition = 
+type Transition = 
     { 
     Source : string
     Destination : string
     EventName : string
     GuardName : string
     ActionName : string
+    }
+    
+type State =
+    {
+    ShortName : string
+    LongName : string
+    InternalTransitions : List<InternalTransition>
+    EntryActions : List<EntryAction>
+    ExitActions : List<ExitAction>
+    Transitions : List<Transition>
+    ChildStates : List<State>
     }

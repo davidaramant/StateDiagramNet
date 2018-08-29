@@ -1,5 +1,4 @@
-﻿using System;
-using Humanizer;
+﻿using Humanizer;
 using Sprache;
 using StateDiagramCodeGen.PlantUMLModel;
 
@@ -7,6 +6,12 @@ namespace StateDiagramCodeGen.Model
 {
     public static class PlantUmlParser
     {
+        private static readonly Parser<string> Star =
+            from leading in Parse.WhiteSpace.Many()
+            from star in Parse.String("[*]").Text()
+            from trailing in Parse.WhiteSpace.Many()
+            select star;
+
         public static readonly Parser<string> Identifier =
             from leading in Parse.WhiteSpace.Many()
             from id in Parse.Identifier(Parse.Letter, Parse.LetterOrDigit).Token()
@@ -47,20 +52,62 @@ namespace StateDiagramCodeGen.Model
             from trailing in Parse.WhiteSpace.Many()
             select action;
 
-        public static readonly Parser<EventTransition> EventTransition =
+        private static readonly Parser<Transition> DecoratedTransition =
             from source in Identifier
+            from arrow in Arrow
+            from destination in Star.Or(Identifier)
+            from colon in Parse.Char(':')
+            from eventName in Identifier.Optional()
+            from guardFunction in Guard.Optional()
+            from actionFunction in Action.Optional()
+            select new Transition(
+                source: source,
+                destination: destination,
+                eventName: eventName.GetOrElse(string.Empty),
+                guardName: guardFunction.GetOrElse(string.Empty),
+                actionName: actionFunction.GetOrElse(string.Empty));
+
+        private static readonly Parser<Transition> UndecoratedTransition =
+            from source in Identifier
+            from arrow in Arrow
+            from destination in Star.Or(Identifier)
+            from trailing in Parse.WhiteSpace.Many()
+            select new Transition(
+                source: source,
+                destination: destination,
+                eventName: string.Empty,
+                guardName: string.Empty,
+                actionName: string.Empty);
+
+        private static readonly Parser<Transition> InitialTransitionWithNoAction =
+            from source in Star
+            from arrow in Arrow
+            from destination in Identifier
+            select new Transition(
+                source: source,
+                destination: destination,
+                eventName: string.Empty,
+                guardName: string.Empty,
+                actionName: string.Empty);
+
+        private static readonly Parser<Transition> InitialTransitionWithAction =
+            from source in Star
             from arrow in Arrow
             from destination in Identifier
             from colon in Parse.Char(':')
-            from eventName in Identifier
-            from guardFunction in Guard.Optional()
-            from actionFunction in Action.Optional()
-            select new EventTransition(
+            from actionFunction in Action
+            select new Transition(
                 source: source,
                 destination: destination,
-                eventName : eventName,
-                guardName: guardFunction.GetOrElse(string.Empty),
-                actionName: actionFunction.GetOrElse(string.Empty));
+                eventName: string.Empty,
+                guardName: string.Empty,
+                actionName: actionFunction);
+
+        private static readonly Parser<Transition> InitialTransition =
+            InitialTransitionWithAction.Or(InitialTransitionWithNoAction);
+
+        public static readonly Parser<Transition> Transition = 
+            InitialTransition.Or(DecoratedTransition).Or(UndecoratedTransition);
 
         public static readonly Parser<EntryAction> EntryAction =
             from leading in Parse.WhiteSpace.Many()
