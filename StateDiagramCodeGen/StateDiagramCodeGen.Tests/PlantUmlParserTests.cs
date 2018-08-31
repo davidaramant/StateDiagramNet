@@ -59,7 +59,7 @@ namespace StateDiagramCodeGen.Tests
         {
             var stateDescription = PlantUmlParser.InternalTransition.Parse(input);
 
-            Assert.That(stateDescription.StateName, Is.EqualTo(state));
+            Assert.That(stateDescription.Source, Is.EqualTo(state));
             Assert.That(stateDescription.EventName, Is.EqualTo(eventName));
             Assert.That(stateDescription.GuardName, Is.EqualTo(guard));
             Assert.That(stateDescription.ActionName, Is.EqualTo(action));

@@ -10,8 +10,4 @@
     <PackageReference Include="Sprache" Version="2.1.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\StateDiagramCodeGen.Model\StateDiagramCodeGen.Model.fsproj" />
-  </ItemGroup>
-
 </Project>

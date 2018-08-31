@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Humanizer;
 using Sprache;
-using StateDiagramCodeGen.PlantUMLModel;
 
 namespace StateDiagramCodeGen.Model
 {
@@ -38,8 +37,8 @@ namespace StateDiagramCodeGen.Model
                 entryActions: new List<EntryAction>(),
                 exitActions: new List<ExitAction>(),
                 internalTransitions: new List<InternalTransition>(),
-                externalsTransitions: new List<ExternalTransition>(),
-                childStates: new List<State>());
+                externalTransitions: new List<ExternalTransition>(),
+                children: new List<State>());
 
         public static readonly Parser<string> DehumanizedSentence =
             from sentence in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Text().Token()
@@ -173,7 +172,7 @@ namespace StateDiagramCodeGen.Model
             from guardFunction in Guard.Optional()
             from actionFunction in Action.Optional()
             select new InternalTransition(
-                stateName: stateName,
+                source: stateName,
                 eventName: eventName,
                 guardName: guardFunction.GetOrElse(string.Empty),
                 actionName: actionFunction.GetOrElse(string.Empty));
