@@ -7,6 +7,7 @@ namespace StateDiagramCodeGen.Tests
     [TestFixture]
     public class PlantUmlParserTests
     {
+        [TestCase("->")]
         [TestCase("-->")]
         [TestCase("-u->")]
         [TestCase("-l->")]
@@ -18,7 +19,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("-down->")]
         public void ShouldParseArrows(string arrow)
         {
-            Assert.That(PlantUmlParser.Arrow.Parse(arrow), Is.EqualTo("-->"));
+            Assert.That(PlantUmlParser.Arrow.Parse(arrow), Is.EqualTo("->"));
         }
 
         [TestCase("MethodName", "MethodName")]
