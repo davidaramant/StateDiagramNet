@@ -1,6 +1,6 @@
 ﻿namespace StateDiagramCodeGen.Model
 {
-    public sealed class ExitAction
+    public sealed class ExitAction : IDiagramElement
     {
         public string StateName { get; }
         public string GuardName { get; }

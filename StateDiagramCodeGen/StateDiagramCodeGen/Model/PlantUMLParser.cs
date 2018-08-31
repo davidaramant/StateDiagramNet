@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Humanizer;
 using Sprache;
 
@@ -23,8 +24,7 @@ namespace StateDiagramCodeGen.Model
             from ws in Parse.WhiteSpace.Many()
             from asKeyword in Parse.String("as")
             select longName;
-
-
+        
         public static readonly Parser<State> State =
             from leading in Parse.WhiteSpace.Many()
             from state in Parse.String("state")
@@ -34,11 +34,7 @@ namespace StateDiagramCodeGen.Model
             select new State(
                 shortName: shortName,
                 longName: longName.GetOrElse(string.Empty),
-                entryActions: new List<EntryAction>(),
-                exitActions: new List<ExitAction>(),
-                internalTransitions: new List<InternalTransition>(),
-                externalTransitions: new List<ExternalTransition>(),
-                children: new List<State>());
+                contents: Enumerable.Empty<IDiagramElement>());
 
         public static readonly Parser<string> DehumanizedSentence =
             from sentence in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Text().Token()

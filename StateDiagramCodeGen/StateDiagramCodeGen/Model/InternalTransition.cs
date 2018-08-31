@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StateDiagramCodeGen.Model
 {
-    public sealed class InternalTransition
+    public sealed class InternalTransition : IDiagramElement
     {
         public string Source { get; }
         public string EventName { get; }

@@ -1,6 +1,6 @@
 ﻿namespace StateDiagramCodeGen.Model
 {
-    public sealed class ExternalTransition
+    public sealed class ExternalTransition : IDiagramElement
     {
         public string Source { get; }
         public string Destination { get; }
