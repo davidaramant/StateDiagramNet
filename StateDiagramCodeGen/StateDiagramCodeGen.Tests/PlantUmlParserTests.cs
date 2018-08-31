@@ -36,14 +36,16 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(PlantUmlParser.DehumanizedSentence.Parse(input), Is.EqualTo(expected));
         }
 
-        [TestCase("state Alpha")]
-        [TestCase("   state Alpha")]
-        [TestCase("state     Alpha")]
-        public void ShouldParseSimpleStateDeclaration(string input)
+        [TestCase("state Alpha", "")]
+        [TestCase("   state Alpha", "")]
+        [TestCase("state     Alpha", "")]
+        [TestCase("state \"Longer Name\" as Alpha", "Longer Name")]
+        public void ShouldParseSimpleStateDeclaration(string input, string longName)
         {
-            var vertex = PlantUmlParser.SimpleStateDeclaration.Parse(input);
+            var vertex = PlantUmlParser.State.Parse(input);
 
-            Assert.That(vertex.Name, Is.EqualTo("Alpha"));
+            Assert.That(vertex.ShortName, Is.EqualTo("Alpha"));
+            Assert.That(vertex.LongName, Is.EqualTo(longName));
         }
 
         [TestCase("State : Event", "State", "Event", "", "")]
