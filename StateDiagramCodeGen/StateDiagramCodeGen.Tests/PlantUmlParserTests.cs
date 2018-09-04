@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Linq;
+using NUnit.Framework;
 using Sprache;
 using StateDiagramCodeGen.Model;
 
@@ -34,18 +36,6 @@ namespace StateDiagramCodeGen.Tests
         public void ShouldDehumanizeMethodSentence(string input, string expected)
         {
             Assert.That(PlantUmlParser.DehumanizedSentence.Parse(input), Is.EqualTo(expected));
-        }
-
-        [TestCase("state Alpha", "")]
-        [TestCase("   state Alpha", "")]
-        [TestCase("state     Alpha", "")]
-        [TestCase("state \"Longer Name\" as Alpha", "Longer Name")]
-        public void ShouldParseSimpleStateDeclaration(string input, string longName)
-        {
-            var vertex = PlantUmlParser.State.Parse(input);
-
-            Assert.That(vertex.ShortName, Is.EqualTo("Alpha"));
-            Assert.That(vertex.LongName, Is.EqualTo(longName));
         }
 
         [TestCase("State : Event", "State", "Event", "", "")]
@@ -189,5 +179,104 @@ namespace StateDiagramCodeGen.Tests
         }
 
         #endregion Event Transitions
+
+        #region States
+
+        [TestCase("state Alpha", "")]
+        [TestCase("   state Alpha", "")]
+        [TestCase("state     Alpha", "")]
+        [TestCase("state \"Longer Name\" as Alpha", "Longer Name")]
+        public void ShouldParseSimpleStateDeclaration(string input, string longName)
+        {
+            var vertex = PlantUmlParser.State.Parse(input);
+
+            Assert.That(vertex.ShortName, Is.EqualTo("Alpha"));
+            Assert.That(vertex.LongName, Is.EqualTo(longName));
+        }
+
+        [TestCase("Alpha: entry / EntryAction", typeof(EntryAction))]
+        [TestCase("Alpha: exit / EntryAction", typeof(ExitAction))]
+        [TestCase("Alpha: SomeEvent / EntryAction", typeof(InternalTransition))]
+        [TestCase("[*]-->Alpha", typeof(ExternalTransition))]
+        [TestCase("Alpha --> Beta : Gamma", typeof(ExternalTransition))]
+        [TestCase("state Alpha", typeof(State))]
+        public void ShouldParseDiagramElement(string input, Type expectedType)
+        {
+            var element = PlantUmlParser.DiagramElement.Parse(input);
+
+            Assert.That(element, Is.TypeOf(expectedType));
+        }
+
+        [Test]
+        public void ShouldParseStateChildren()
+        {
+            var input = "{\n" +
+                        "Alpha: entry / EntryAction\n" +
+                        "Alpha: exit / ExitAction\n" +
+                        "}";
+
+            var contents = PlantUmlParser.StateChildren.Parse(input).ToList();
+            
+            Assert.That(contents, Has.Count.EqualTo(2));
+            Assert.That(contents, Has.One.TypeOf<EntryAction>());
+            Assert.That(contents, Has.One.TypeOf<ExitAction>());
+        }
+
+        [Test]
+        public void ShouldParseStateWithEntryAndExitActions()
+        {
+            var input = "state Alpha {\n" +
+                        "Alpha: entry / EntryAction\n" +
+                        "Alpha: exit / ExitAction\n" +
+                        "}";
+
+            var state = PlantUmlParser.State.Parse(input);
+
+            var contents = state.Contents.ToList();
+
+            Assert.That(contents, Has.Count.EqualTo(2));
+            Assert.That(contents, Has.One.TypeOf<EntryAction>());
+            Assert.That(contents, Has.One.TypeOf<ExitAction>());
+        }
+
+        [Test]
+        public void ShouldParseNestedSimpleState()
+        {
+            var input = "state Alpha {\n" +
+                        "   state Beta\n" +
+                        "}";
+
+            var alphaState = PlantUmlParser.State.Parse(input);
+
+            var alphaContents = alphaState.Contents.ToList();
+
+            Assert.That(alphaContents, Has.Count.EqualTo(1), "Incorrect children for Alpha");
+            Assert.That(alphaContents, Has.One.TypeOf<State>());
+        }
+
+        [Test]
+        public void ShouldParseNestedCompositeState()
+        {
+            var input = "state Alpha {\n" +
+                        "   state Beta {\n" +
+                        "       state Gamma" +
+                        "   }\n" +
+                        "}";
+
+            var alphaState = PlantUmlParser.State.End().Parse(input);
+
+            var alphaContents = alphaState.Contents.ToList();
+
+            Assert.That(alphaContents, Has.Count.EqualTo(1), "Incorrect children for Alpha");
+            Assert.That(alphaContents, Has.One.TypeOf<State>());
+
+            var betaState = (State)alphaContents.First();
+            var betaContents = betaState.Contents.ToList();
+
+            Assert.That(betaContents, Has.Count.EqualTo(1), "Incorrect children for Beta");
+            Assert.That(betaContents, Has.One.TypeOf<State>());
+        }
+
+        #endregion States
     }
 }

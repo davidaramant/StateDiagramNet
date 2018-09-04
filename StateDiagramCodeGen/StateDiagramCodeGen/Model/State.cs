@@ -2,7 +2,7 @@
 
 namespace StateDiagramCodeGen.Model
 {
-    public sealed class State
+    public sealed class State : IDiagramElement
     {
         public string ShortName { get; }
         public string LongName { get; }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Humanizer;
 using Sprache;
 
@@ -24,17 +25,6 @@ namespace StateDiagramCodeGen.Model
             from ws in Parse.WhiteSpace.Many()
             from asKeyword in Parse.String("as")
             select longName;
-        
-        public static readonly Parser<State> State =
-            from leading in Parse.WhiteSpace.Many()
-            from state in Parse.String("state")
-            from ws in Parse.WhiteSpace.AtLeastOnce()
-            from longName in LongStateName.Optional()
-            from shortName in Identifier
-            select new State(
-                shortName: shortName,
-                longName: longName.GetOrElse(string.Empty),
-                contents: Enumerable.Empty<IDiagramElement>());
 
         public static readonly Parser<string> DehumanizedSentence =
             from sentence in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Text().Token()
@@ -173,6 +163,30 @@ namespace StateDiagramCodeGen.Model
                 guardName: guardFunction.GetOrElse(string.Empty),
                 actionName: actionFunction.GetOrElse(string.Empty));
 
+        public static readonly Parser<State> State =
+            from leading in Parse.WhiteSpace.Many()
+            from state in Parse.String("state")
+            from ws in Parse.WhiteSpace.AtLeastOnce()
+            from longName in LongStateName.Optional()
+            from shortName in Identifier
+            from children in StateChildren.Optional()
+            select new State(
+                shortName: shortName,
+                longName: longName.GetOrElse(string.Empty),
+                contents: children.GetOrElse(Enumerable.Empty<IDiagramElement>()));
+
+        private static readonly Parser<IDiagramElement> StateDiagramElement =
+            from state in State
+            select (IDiagramElement)state;
+
+        public static readonly Parser<IDiagramElement> DiagramElement =
+            StateDiagramElement.Or(EntryAction).Or(ExitAction).Or(InternalTransition).Or(Transition);
+
+        public static readonly Parser<IEnumerable<IDiagramElement>> StateChildren =
+            from openParen in Parse.Char('{')
+            from children in DiagramElement.Many()
+            from closeParen in Parse.Char('}')
+            select children;
 
         static readonly CommentParser Comment = new CommentParser("'", "/'", "'/");
 
