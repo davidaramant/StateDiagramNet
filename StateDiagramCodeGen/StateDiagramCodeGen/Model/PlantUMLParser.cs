@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Xml;
 using Humanizer;
 using Sprache;
 
@@ -8,31 +9,28 @@ namespace StateDiagramCodeGen.Model
 {
     public static class PlantUmlParser
     {
+        private static readonly Parser<string> SpacesOrTabs = from ws in Parse.Chars(' ', '\t').Many() select " ";
+
         private static readonly Parser<string> Star =
-            from leading in Parse.WhiteSpace.Many()
-            from star in Parse.String("[*]").Text()
-            from trailing in Parse.WhiteSpace.Many()
-            select star;
+            from star in Parse.String("[*]")
+            from _ in SpacesOrTabs
+            select "[*]";
 
         public static readonly Parser<string> Identifier =
-            from leading in Parse.WhiteSpace.Many()
-            from id in Parse.Identifier(Parse.Letter, Parse.LetterOrDigit).Token()
-            from trailing in Parse.WhiteSpace.Many()
+            from id in Parse.Identifier(Parse.Letter, Parse.LetterOrDigit)
+            from _ in SpacesOrTabs
             select id;
 
-        public static readonly Parser<string> LongStateName =
-            from longName in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Contained(Parse.Char('"'), Parse.Char('"')).Text().Token()
-            from ws in Parse.WhiteSpace.Many()
-            from asKeyword in Parse.String("as")
-            select longName;
 
         public static readonly Parser<string> DehumanizedSentence =
             from sentence in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Text().Token()
+            from _ in SpacesOrTabs
             select sentence.Dehumanize();
 
         public static readonly Parser<string> MethodReference =
-            from id in Identifier
-            from parens in Parse.String("()").Optional()
+            from id in Parse.Identifier(Parse.Letter, Parse.LetterOrDigit)
+            from parens in Parse.String("()")
+            from _ in SpacesOrTabs
             select id;
 
         public static readonly Parser<string> FriendlyMethodReference = DehumanizedSentence.Or(MethodReference);
@@ -50,28 +48,31 @@ namespace StateDiagramCodeGen.Model
                 .Or(Parse.String("--"))
                 .Or(Parse.String("-"))
             from end in Parse.String(">")
+            from _ in SpacesOrTabs
             select "->";
 
+        private static Parser<char> CharWithTrailing(char c) =>
+            from _ in Parse.Char(c)
+            from trailing in SpacesOrTabs
+            select c;
+
         private static readonly Parser<string> Guard =
-            from leading in Parse.WhiteSpace.Many()
-            from openGuard in Parse.Char('[')
+            from openGuard in CharWithTrailing('[')
             from guard in FriendlyMethodReference
-            from closeGuard in Parse.Char(']')
-            from trailing in Parse.WhiteSpace.Many()
+            from closeGuard in CharWithTrailing(']')
             select guard;
 
         private static readonly Parser<string> Action =
-            from leading in Parse.WhiteSpace.Many()
-            from openGuard in Parse.Char('/')
+            from openAction in CharWithTrailing('/')
             from action in FriendlyMethodReference
-            from trailing in Parse.WhiteSpace.Many()
             select action;
 
         private static readonly Parser<ExternalTransition> DecoratedTransition =
+            from indentation in SpacesOrTabs
             from source in Identifier
             from arrow in Arrow
             from destination in Star.Or(Identifier)
-            from colon in Parse.Char(':')
+            from colon in CharWithTrailing(':')
             from eventName in Identifier.Optional()
             from guardFunction in Guard.Optional()
             from actionFunction in Action.Optional()
@@ -83,10 +84,10 @@ namespace StateDiagramCodeGen.Model
                 actionName: actionFunction.GetOrElse(string.Empty));
 
         private static readonly Parser<ExternalTransition> UndecoratedTransition =
+            from indentation in SpacesOrTabs
             from source in Identifier
             from arrow in Arrow
             from destination in Star.Or(Identifier)
-            from trailing in Parse.WhiteSpace.Many()
             select new ExternalTransition(
                 source: source,
                 destination: destination,
@@ -109,7 +110,7 @@ namespace StateDiagramCodeGen.Model
             from source in Star
             from arrow in Arrow
             from destination in Identifier
-            from colon in Parse.Char(':')
+            from colon in CharWithTrailing(':')
             from actionFunction in Action
             select new ExternalTransition(
                 source: source,
@@ -121,39 +122,13 @@ namespace StateDiagramCodeGen.Model
         private static readonly Parser<ExternalTransition> InitialTransition =
             InitialTransitionWithAction.Or(InitialTransitionWithNoAction);
 
-        public static readonly Parser<ExternalTransition> Transition =
+        public static readonly Parser<ExternalTransition> ExternalTransition =
             InitialTransition.Or(DecoratedTransition).Or(UndecoratedTransition);
 
-        public static readonly Parser<EntryAction> EntryAction =
-            from leading in Parse.WhiteSpace.Many()
-            from stateName in Identifier
-            from colon in Parse.Char(':')
-            from ws in Parse.WhiteSpace.Many()
-            from eventName in Parse.String("entry")
-            from guardFunction in Guard.Optional()
-            from actionFunction in Action.Optional()
-            select new EntryAction(
-                stateName: stateName,
-                guardName: guardFunction.GetOrElse(string.Empty),
-                actionName: actionFunction.GetOrElse(string.Empty));
-
-        public static readonly Parser<ExitAction> ExitAction =
-            from leading in Parse.WhiteSpace.Many()
-            from stateName in Identifier
-            from colon in Parse.Char(':')
-            from ws in Parse.WhiteSpace.Many()
-            from eventName in Parse.String("exit")
-            from guardFunction in Guard.Optional()
-            from actionFunction in Action.Optional()
-            select new ExitAction(
-                stateName: stateName,
-                guardName: guardFunction.GetOrElse(string.Empty),
-                actionName: actionFunction.GetOrElse(string.Empty));
-
         public static readonly Parser<InternalTransition> InternalTransition =
-            from leading in Parse.WhiteSpace.Many()
+            from leading in SpacesOrTabs
             from stateName in Identifier
-            from colon in Parse.Char(':')
+            from colon in CharWithTrailing(':')
             from eventName in Identifier
             from guardFunction in Guard.Optional()
             from actionFunction in Action.Optional()
@@ -163,10 +138,17 @@ namespace StateDiagramCodeGen.Model
                 guardName: guardFunction.GetOrElse(string.Empty),
                 actionName: actionFunction.GetOrElse(string.Empty));
 
+        public static readonly Parser<string> LongStateName =
+            from longName in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Contained(Parse.Char('"'), Parse.Char('"')).Text().Token()
+            from ws in SpacesOrTabs
+            from asKeyword in Parse.String("as")
+            from ws2 in SpacesOrTabs
+            select longName;
+        
         public static readonly Parser<State> State =
-            from leading in Parse.WhiteSpace.Many()
+            from leading in SpacesOrTabs
             from state in Parse.String("state")
-            from ws in Parse.WhiteSpace.AtLeastOnce()
+            from ws in Parse.Chars(' ','\t').AtLeastOnce()
             from longName in LongStateName.Optional()
             from shortName in Identifier
             from children in StateChildren.Optional()
@@ -179,13 +161,18 @@ namespace StateDiagramCodeGen.Model
             from state in State
             select (IDiagramElement)state;
 
-        public static readonly Parser<IDiagramElement> DiagramElement =
-            StateDiagramElement.Or(EntryAction).Or(ExitAction).Or(InternalTransition).Or(Transition);
+        public static readonly Parser<IDiagramElement> StateComponent =
+            from element in StateDiagramElement
+                .Or(InternalTransition)
+                .Or(ExternalTransition)
+            from newLine in Parse.LineEnd
+            select element;
 
         public static readonly Parser<IEnumerable<IDiagramElement>> StateChildren =
-            from openParen in Parse.Char('{')
-            from children in DiagramElement.Many()
-            from closeParen in Parse.Char('}')
+            from openParen in CharWithTrailing('{')
+            from children in StateComponent.Many()
+            from indentation in SpacesOrTabs
+            from closeParen in CharWithTrailing('}')
             select children;
 
         static readonly CommentParser Comment = new CommentParser("'", "/'", "'/");

@@ -28,16 +28,17 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("MethodName()", "MethodName")]
         public void ShouldParseMethodReference(string input, string expected)
         {
-            Assert.That(PlantUmlParser.MethodReference.Parse(input), Is.EqualTo(expected));
+            Assert.That(PlantUmlParser.FriendlyMethodReference.Parse(input), Is.EqualTo(expected));
         }
 
         [TestCase("Method Name", "MethodName")]
         [TestCase("A really long method name", "AReallyLongMethodName")]
         public void ShouldDehumanizeMethodSentence(string input, string expected)
         {
-            Assert.That(PlantUmlParser.DehumanizedSentence.Parse(input), Is.EqualTo(expected));
+            Assert.That(PlantUmlParser.FriendlyMethodReference.Parse(input), Is.EqualTo(expected));
         }
 
+        [TestCase("Alpha: SomeEvent / Action", "Alpha", "SomeEvent", "", "Action")]
         [TestCase("State : Event", "State", "Event", "", "")]
         [TestCase("State : Event /", "State", "Event", "", "")]
         [TestCase("State : Event / Action", "State", "Event", "", "Action")]
@@ -65,9 +66,10 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("State:entry[Guard]/Action", "State", "Guard", "Action")]
         public void ShouldParseEntryAction(string input, string state, string guard, string action)
         {
-            var entryAction = PlantUmlParser.EntryAction.Parse(input);
+            var entryAction = PlantUmlParser.InternalTransition.Parse(input);
 
-            Assert.That(entryAction.StateName, Is.EqualTo(state));
+            Assert.That(entryAction.Source, Is.EqualTo(state));
+            Assert.That(entryAction.EventName, Is.EqualTo("entry"));
             Assert.That(entryAction.GuardName, Is.EqualTo(guard));
             Assert.That(entryAction.ActionName, Is.EqualTo(action));
         }
@@ -82,9 +84,10 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("State:exit[Guard]/Action", "State", "Guard", "Action")]
         public void ShouldParseExitAction(string input, string state, string guard, string action)
         {
-            var exitAction = PlantUmlParser.ExitAction.Parse(input);
+            var exitAction = PlantUmlParser.InternalTransition.Parse(input);
 
-            Assert.That(exitAction.StateName, Is.EqualTo(state));
+            Assert.That(exitAction.Source, Is.EqualTo(state));
+            Assert.That(exitAction.EventName, Is.EqualTo("exit"));
             Assert.That(exitAction.GuardName, Is.EqualTo(guard));
             Assert.That(exitAction.ActionName, Is.EqualTo(action));
         }
@@ -95,7 +98,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("[*] --> Alpha : /Beta", "Alpha", "Beta")]
         public void ShouldParseInitialTransition(string input, string destination, string action)
         {
-            var initialTransition = PlantUmlParser.Transition.Parse(input);
+            var initialTransition = PlantUmlParser.ExternalTransition.Parse(input);
 
             Assert.That(initialTransition.Source, Is.EqualTo("[*]"));
             Assert.That(initialTransition.Destination, Is.EqualTo(destination));
@@ -110,7 +113,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("Alpha --> [*] : EventName [Guard] / Beta", "EventName", "Guard", "Beta")]
         public void ShouldParseTransitionsToFinal(string input, string eventName, string guard, string action)
         {
-            var initialTransition = PlantUmlParser.Transition.Parse(input);
+            var initialTransition = PlantUmlParser.ExternalTransition.Parse(input);
 
             Assert.That(initialTransition.Source, Is.EqualTo("Alpha"));
             Assert.That(initialTransition.Destination, Is.EqualTo("[*]"));
@@ -127,7 +130,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("Alpha-->Beta:Gamma")]
         public void ShouldParseSimpleEventTransition(string input)
         {
-            var transition = PlantUmlParser.Transition.Parse(input);
+            var transition = PlantUmlParser.ExternalTransition.Parse(input);
 
             Assert.That(transition.Source, Is.EqualTo("Alpha"));
             Assert.That(transition.Destination, Is.EqualTo("Beta"));
@@ -141,7 +144,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("    Alpha --> Beta : Gamma [  Condition Text ]", "ConditionText")]
         public void ShouldParseGuardedEventTransition(string input, string guard)
         {
-            var transition = PlantUmlParser.Transition.Parse(input);
+            var transition = PlantUmlParser.ExternalTransition.Parse(input);
 
             Assert.That(transition.Source, Is.EqualTo("Alpha"));
             Assert.That(transition.Destination, Is.EqualTo("Beta"));
@@ -155,7 +158,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("Alpha --> Beta : Gamma /  Action Text", "ActionText")]
         public void ShouldParseEventTransitionWithAction(string input, string action)
         {
-            var transition = PlantUmlParser.Transition.Parse(input);
+            var transition = PlantUmlParser.ExternalTransition.Parse(input);
 
             Assert.That(transition.Source, Is.EqualTo("Alpha"));
             Assert.That(transition.Destination, Is.EqualTo("Beta"));
@@ -169,7 +172,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("Alpha --> Beta : Gamma [ Guard Text ] / Action Text", "GuardText", "ActionText")]
         public void ShouldParseGuardedEventTransitionWithAction(string input, string guard, string action)
         {
-            var transition = PlantUmlParser.Transition.Parse(input);
+            var transition = PlantUmlParser.ExternalTransition.Parse(input);
 
             Assert.That(transition.Source, Is.EqualTo("Alpha"));
             Assert.That(transition.Destination, Is.EqualTo("Beta"));
@@ -188,21 +191,19 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("state \"Longer Name\" as Alpha", "Longer Name")]
         public void ShouldParseSimpleStateDeclaration(string input, string longName)
         {
-            var vertex = PlantUmlParser.State.Parse(input);
+            var vertex = PlantUmlParser.State.End().Parse(input);
 
             Assert.That(vertex.ShortName, Is.EqualTo("Alpha"));
             Assert.That(vertex.LongName, Is.EqualTo(longName));
         }
 
-        [TestCase("Alpha: entry / EntryAction", typeof(EntryAction))]
-        [TestCase("Alpha: exit / EntryAction", typeof(ExitAction))]
-        [TestCase("Alpha: SomeEvent / EntryAction", typeof(InternalTransition))]
-        [TestCase("[*]-->Alpha", typeof(ExternalTransition))]
-        [TestCase("Alpha --> Beta : Gamma", typeof(ExternalTransition))]
-        [TestCase("state Alpha", typeof(State))]
-        public void ShouldParseDiagramElement(string input, Type expectedType)
+        [TestCase("Alpha: SomeEvent / Action\n", typeof(InternalTransition))]
+        [TestCase("[*]-->Alpha\n", typeof(ExternalTransition))]
+        [TestCase("Alpha --> Beta : Gamma\n", typeof(ExternalTransition))]
+        [TestCase("state Alpha\n", typeof(State))]
+        public void ShouldParseStateComponent(string input, Type expectedType)
         {
-            var element = PlantUmlParser.DiagramElement.Parse(input);
+            var element = PlantUmlParser.StateComponent.End().Parse(input);
 
             Assert.That(element, Is.TypeOf(expectedType));
         }
@@ -217,17 +218,15 @@ namespace StateDiagramCodeGen.Tests
 
             var contents = PlantUmlParser.StateChildren.Parse(input).ToList();
             
-            Assert.That(contents, Has.Count.EqualTo(2));
-            Assert.That(contents, Has.One.TypeOf<EntryAction>());
-            Assert.That(contents, Has.One.TypeOf<ExitAction>());
+            Assert.That(contents, Has.Count.EqualTo(2).And.TypeOf<InternalTransition>());
         }
 
         [Test]
         public void ShouldParseStateWithEntryAndExitActions()
         {
             var input = "state Alpha {\n" +
-                        "Alpha: entry / EntryAction\n" +
-                        "Alpha: exit / ExitAction\n" +
+                        "   Alpha: entry / EntryAction\n" +
+                        "   Alpha: exit / ExitAction\n" +
                         "}";
 
             var state = PlantUmlParser.State.Parse(input);
@@ -235,8 +234,7 @@ namespace StateDiagramCodeGen.Tests
             var contents = state.Contents.ToList();
 
             Assert.That(contents, Has.Count.EqualTo(2));
-            Assert.That(contents, Has.One.TypeOf<EntryAction>());
-            Assert.That(contents, Has.One.TypeOf<ExitAction>());
+            Assert.That(contents, Has.Count.EqualTo(2).And.TypeOf<InternalTransition>());
         }
 
         [Test]
