@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Xml;
 using Humanizer;
 using Sprache;
 
@@ -68,7 +66,6 @@ namespace StateDiagramCodeGen.Model
             select action;
 
         private static readonly Parser<ExternalTransition> DecoratedTransition =
-            from indentation in SpacesOrTabs
             from source in Identifier
             from arrow in Arrow
             from destination in Star.Or(Identifier)
@@ -84,7 +81,6 @@ namespace StateDiagramCodeGen.Model
                 actionName: actionFunction.GetOrElse(string.Empty));
 
         private static readonly Parser<ExternalTransition> UndecoratedTransition =
-            from indentation in SpacesOrTabs
             from source in Identifier
             from arrow in Arrow
             from destination in Star.Or(Identifier)
@@ -146,7 +142,6 @@ namespace StateDiagramCodeGen.Model
             select longName;
         
         public static readonly Parser<State> State =
-            from leading in SpacesOrTabs
             from state in Parse.String("state")
             from ws in Parse.Chars(' ','\t').AtLeastOnce()
             from longName in LongStateName.Optional()
@@ -162,6 +157,7 @@ namespace StateDiagramCodeGen.Model
             select (IDiagramElement)state;
 
         public static readonly Parser<IDiagramElement> StateComponent =
+            from indentation in Parse.WhiteSpace.Many()
             from element in StateDiagramElement
                 .Or(InternalTransition)
                 .Or(ExternalTransition)
@@ -171,7 +167,7 @@ namespace StateDiagramCodeGen.Model
         public static readonly Parser<IEnumerable<IDiagramElement>> StateChildren =
             from openParen in CharWithTrailing('{')
             from children in StateComponent.Many()
-            from indentation in SpacesOrTabs
+            from ws in Parse.WhiteSpace.Many()
             from closeParen in CharWithTrailing('}')
             select children;
 

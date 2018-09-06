@@ -124,8 +124,8 @@ namespace StateDiagramCodeGen.Tests
 
         #region Event Transitions
 
-        [TestCase("    Alpha --> Beta : Gamma")]
-        [TestCase("    Alpha   -->    Beta   :   Gamma")]
+        [TestCase("Alpha --> Beta : Gamma")]
+        [TestCase("Alpha   -->    Beta   :   Gamma")]
         [TestCase("\tAlpha\t-->\tBeta\t:\tGamma")]
         [TestCase("Alpha-->Beta:Gamma")]
         public void ShouldParseSimpleEventTransition(string input)
@@ -139,9 +139,9 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(transition.ActionName, Is.Empty);
         }
 
-        [TestCase("    Alpha --> Beta : Gamma [Delta]", "Delta")]
+        [TestCase("Alpha --> Beta : Gamma [Delta]", "Delta")]
         [TestCase("Alpha-->Beta:Gamma[Delta]", "Delta")]
-        [TestCase("    Alpha --> Beta : Gamma [  Condition Text ]", "ConditionText")]
+        [TestCase("Alpha --> Beta : Gamma [  Condition Text ]", "ConditionText")]
         public void ShouldParseGuardedEventTransition(string input, string guard)
         {
             var transition = PlantUmlParser.ExternalTransition.Parse(input);
@@ -153,7 +153,7 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(transition.ActionName, Is.Empty);
         }
 
-        [TestCase("    Alpha --> Beta : Gamma / Zeta", "Zeta")]
+        [TestCase("Alpha --> Beta : Gamma / Zeta", "Zeta")]
         [TestCase("Alpha-->Beta:Gamma/Zeta", "Zeta")]
         [TestCase("Alpha --> Beta : Gamma /  Action Text", "ActionText")]
         public void ShouldParseEventTransitionWithAction(string input, string action)
@@ -167,7 +167,7 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(transition.ActionName, Is.EqualTo(action));
         }
 
-        [TestCase("    Alpha --> Beta : Gamma [Delta] / Zeta", "Delta", "Zeta")]
+        [TestCase("Alpha --> Beta : Gamma [Delta] / Zeta", "Delta", "Zeta")]
         [TestCase("Alpha-->Beta:Gamma[Delta]/Zeta", "Delta", "Zeta")]
         [TestCase("Alpha --> Beta : Gamma [ Guard Text ] / Action Text", "GuardText", "ActionText")]
         public void ShouldParseGuardedEventTransitionWithAction(string input, string guard, string action)
@@ -186,7 +186,7 @@ namespace StateDiagramCodeGen.Tests
         #region States
 
         [TestCase("state Alpha", "")]
-        [TestCase("   state Alpha", "")]
+        [TestCase("state Alpha", "")]
         [TestCase("state     Alpha", "")]
         [TestCase("state \"Longer Name\" as Alpha", "Longer Name")]
         public void ShouldParseSimpleStateDeclaration(string input, string longName)
