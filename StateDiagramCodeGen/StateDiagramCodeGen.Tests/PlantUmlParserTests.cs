@@ -197,13 +197,13 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(vertex.LongName, Is.EqualTo(longName));
         }
 
-        [TestCase("    Alpha: SomeEvent / Action", typeof(InternalTransition))]
-        [TestCase("    [*]-->Alpha", typeof(ExternalTransition))]
-        [TestCase("    Alpha --> Beta : Gamma", typeof(ExternalTransition))]
-        [TestCase("    state Alpha", typeof(State))]
+        [TestCase("Alpha: SomeEvent / Action", typeof(InternalTransition))]
+        [TestCase("[*]-->Alpha", typeof(ExternalTransition))]
+        [TestCase("Alpha --> Beta : Gamma", typeof(ExternalTransition))]
+        [TestCase("state Alpha", typeof(State))]
         public void ShouldParseStateComponent(string input, Type expectedType)
         {
-            var element = PlantUmlParser.StateComponent.End().Parse(input);
+            var element = PlantUmlParser.DiagramElement.End().Parse(input);
 
             Assert.That(element, Is.TypeOf(expectedType));
         }
@@ -277,5 +277,31 @@ namespace StateDiagramCodeGen.Tests
         }
 
         #endregion States
+
+        [Test]
+        public void ShouldParseDiagram()
+        {
+            const string input = @"@startuml ""Simple Diagram""
+                state Off
+                state On {
+                    state Idle
+                    [*]->Idle
+                    state Responding
+                    Responding : entry / StartProcessing
+                    Responding : exit / StopProcessing
+                }
+                On : entry / EnableLed
+                On : exit / DisableLed
+                [*] -> Off
+                Off -> On : PowerToggle
+                On --> Off : PowerToggle
+                Idle --> Responding : ButtonPressed
+                Responding --> Idle : DoneProcessing
+                @enduml";
+
+            var diagram = PlantUmlParser.Diagram.End().Parse(input);
+
+            Assert.That(diagram.Name, Is.EqualTo("Simple Diagram"));
+        }
     }
 }

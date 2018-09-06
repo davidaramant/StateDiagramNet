@@ -9,17 +9,24 @@ namespace StateDiagramCodeGen.Model
     {
         private static readonly Parser<string> SpacesOrTabs = from ws in Parse.Chars(' ', '\t').Many() select " ";
 
-        private static readonly Parser<string> Star =
+        private static Parser<T> AndTrailingPadding<T>(this Parser<T> parser) =>
+            from _ in parser
+            from trailing in SpacesOrTabs
+            select _;
+
+        private static Parser<T> AndTrailingWhitespace<T>(this Parser<T> parser) =>
+            from _ in parser
+            from trailing in Parse.WhiteSpace.Many()
+            select _;
+
+        private static readonly Parser<string> Star = 
             from star in Parse.String("[*]")
             from _ in SpacesOrTabs
             select "[*]";
 
         public static readonly Parser<string> Identifier =
-            from id in Parse.Identifier(Parse.Letter, Parse.LetterOrDigit)
-            from _ in SpacesOrTabs
-            select id;
-
-
+            Parse.Identifier(Parse.Letter, Parse.LetterOrDigit).AndTrailingPadding();
+        
         public static readonly Parser<string> DehumanizedSentence =
             from sentence in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Text().Token()
             from _ in SpacesOrTabs
@@ -49,19 +56,17 @@ namespace StateDiagramCodeGen.Model
             from _ in SpacesOrTabs
             select "->";
 
-        private static Parser<char> CharWithTrailing(char c) =>
-            from _ in Parse.Char(c)
-            from trailing in SpacesOrTabs
-            select c;
-
+        private static Parser<char> CharWithTrailingPadding(char c) => Parse.Char(c).AndTrailingPadding();
+        private static Parser<char> CharWithTrailingWhitespace(char c) => Parse.Char(c).AndTrailingWhitespace();
+        
         private static readonly Parser<string> Guard =
-            from openGuard in CharWithTrailing('[')
+            from openGuard in CharWithTrailingPadding('[')
             from guard in FriendlyMethodReference
-            from closeGuard in CharWithTrailing(']')
+            from closeGuard in CharWithTrailingPadding(']')
             select guard;
 
         private static readonly Parser<string> Action =
-            from openAction in CharWithTrailing('/')
+            from openAction in CharWithTrailingPadding('/')
             from action in FriendlyMethodReference
             select action;
 
@@ -69,7 +74,7 @@ namespace StateDiagramCodeGen.Model
             from source in Identifier
             from arrow in Arrow
             from destination in Star.Or(Identifier)
-            from colon in CharWithTrailing(':')
+            from colon in CharWithTrailingPadding(':')
             from eventName in Identifier.Optional()
             from guardFunction in Guard.Optional()
             from actionFunction in Action.Optional()
@@ -106,7 +111,7 @@ namespace StateDiagramCodeGen.Model
             from source in Star
             from arrow in Arrow
             from destination in Identifier
-            from colon in CharWithTrailing(':')
+            from colon in CharWithTrailingPadding(':')
             from actionFunction in Action
             select new ExternalTransition(
                 source: source,
@@ -124,7 +129,7 @@ namespace StateDiagramCodeGen.Model
         public static readonly Parser<InternalTransition> InternalTransition =
             from leading in SpacesOrTabs
             from stateName in Identifier
-            from colon in CharWithTrailing(':')
+            from colon in CharWithTrailingPadding(':')
             from eventName in Identifier
             from guardFunction in Guard.Optional()
             from actionFunction in Action.Optional()
@@ -134,16 +139,16 @@ namespace StateDiagramCodeGen.Model
                 guardName: guardFunction.GetOrElse(string.Empty),
                 actionName: actionFunction.GetOrElse(string.Empty));
 
+        public static readonly Parser<string> QuotedString =
+            Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Contained(Parse.Char('"'), Parse.Char('"')).Text();
+
         public static readonly Parser<string> LongStateName =
-            from longName in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Contained(Parse.Char('"'), Parse.Char('"')).Text().Token()
-            from ws in SpacesOrTabs
-            from asKeyword in Parse.String("as")
-            from ws2 in SpacesOrTabs
+            from longName in QuotedString.AndTrailingPadding()
+            from asKeyword in Parse.String("as").AndTrailingPadding()
             select longName;
         
         public static readonly Parser<State> State =
-            from state in Parse.String("state")
-            from ws in Parse.Chars(' ','\t').AtLeastOnce()
+            from state in Parse.String("state").AndTrailingPadding()
             from longName in LongStateName.Optional()
             from shortName in Identifier
             from children in StateChildren.Optional()
@@ -156,23 +161,35 @@ namespace StateDiagramCodeGen.Model
             from state in State
             select (IDiagramElement)state;
 
-        public static readonly Parser<IDiagramElement> StateComponent =
-            from indentation in Parse.WhiteSpace.Many()
+        public static readonly Parser<IDiagramElement> DiagramElement =
             from element in StateDiagramElement
                 .Or(InternalTransition)
                 .Or(ExternalTransition)
+            from trailing in Parse.WhiteSpace.Many()
             select element;
 
         public static readonly Parser<IEnumerable<IDiagramElement>> StateChildren =
-            from openParen in CharWithTrailing('{')
-            from children in StateComponent.Many()
-            from ws in Parse.WhiteSpace.Many()
-            from closeParen in CharWithTrailing('}')
+            from openParen in CharWithTrailingWhitespace('{')
+            from children in DiagramElement.Many()
+            from closeParen in CharWithTrailingWhitespace('}')
             select children;
 
         static readonly CommentParser Comment = new CommentParser("'", "/'", "'/");
 
-        public static readonly Parser<string> StartDiagram = Parse.String("@startuml").Token().Text();
-        public static readonly Parser<string> EndDiagram = Parse.String("@enduml").Token().Text();
+        private static readonly Parser<IOption<string>> StartDiagram =
+            from start in Parse.String("@startuml").AndTrailingWhitespace()
+            from name in QuotedString.Optional()
+            from trailing in Parse.WhiteSpace.Many()
+            select name;
+
+        static readonly Parser<string> EndDiagram = 
+            from end in Parse.String("@enduml").AndTrailingWhitespace()
+            select "end";
+
+        public static readonly Parser<Diagram> Diagram =
+            from diagramName in StartDiagram
+            from elements in DiagramElement.Many()
+            from end in EndDiagram
+            select new Diagram(diagramName.GetOrElse("Unnamed"), elements);
     }
 }
