@@ -1,4 +1,4 @@
-﻿namespace StateDiagramCodeGen.Model
+﻿namespace StateDiagramCodeGen.ParsingModel
 {
     public interface IDiagramElement
     {

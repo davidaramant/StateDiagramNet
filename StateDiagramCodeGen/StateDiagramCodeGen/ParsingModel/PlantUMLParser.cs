@@ -3,7 +3,7 @@ using System.Linq;
 using Humanizer;
 using Sprache;
 
-namespace StateDiagramCodeGen.Model
+namespace StateDiagramCodeGen.ParsingModel
 {
     public static class PlantUmlParser
     {

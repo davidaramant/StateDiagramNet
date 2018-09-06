@@ -2,7 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using Sprache;
-using StateDiagramCodeGen.Model;
+using StateDiagramCodeGen.ParsingModel;
 
 namespace StateDiagramCodeGen.Tests
 {
