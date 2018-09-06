@@ -161,7 +161,6 @@ namespace StateDiagramCodeGen.Model
             from element in StateDiagramElement
                 .Or(InternalTransition)
                 .Or(ExternalTransition)
-            from newLine in Parse.LineEnd
             select element;
 
         public static readonly Parser<IEnumerable<IDiagramElement>> StateChildren =

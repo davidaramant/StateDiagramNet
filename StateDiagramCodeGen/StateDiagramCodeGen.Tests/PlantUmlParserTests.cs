@@ -126,7 +126,7 @@ namespace StateDiagramCodeGen.Tests
 
         [TestCase("Alpha --> Beta : Gamma")]
         [TestCase("Alpha   -->    Beta   :   Gamma")]
-        [TestCase("\tAlpha\t-->\tBeta\t:\tGamma")]
+        [TestCase("Alpha\t-->\tBeta\t:\tGamma")]
         [TestCase("Alpha-->Beta:Gamma")]
         public void ShouldParseSimpleEventTransition(string input)
         {
@@ -197,10 +197,10 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(vertex.LongName, Is.EqualTo(longName));
         }
 
-        [TestCase("Alpha: SomeEvent / Action\n", typeof(InternalTransition))]
-        [TestCase("[*]-->Alpha\n", typeof(ExternalTransition))]
-        [TestCase("Alpha --> Beta : Gamma\n", typeof(ExternalTransition))]
-        [TestCase("state Alpha\n", typeof(State))]
+        [TestCase("    Alpha: SomeEvent / Action", typeof(InternalTransition))]
+        [TestCase("    [*]-->Alpha", typeof(ExternalTransition))]
+        [TestCase("    Alpha --> Beta : Gamma", typeof(ExternalTransition))]
+        [TestCase("    state Alpha", typeof(State))]
         public void ShouldParseStateComponent(string input, Type expectedType)
         {
             var element = PlantUmlParser.StateComponent.End().Parse(input);
@@ -218,7 +218,8 @@ namespace StateDiagramCodeGen.Tests
 
             var contents = PlantUmlParser.StateChildren.Parse(input).ToList();
             
-            Assert.That(contents, Has.Count.EqualTo(2).And.TypeOf<InternalTransition>());
+            Assert.That(contents, Has.Count.EqualTo(2));
+            Assert.That(contents, Has.All.TypeOf<InternalTransition>());
         }
 
         [Test]
@@ -234,7 +235,7 @@ namespace StateDiagramCodeGen.Tests
             var contents = state.Contents.ToList();
 
             Assert.That(contents, Has.Count.EqualTo(2));
-            Assert.That(contents, Has.Count.EqualTo(2).And.TypeOf<InternalTransition>());
+            Assert.That(contents, Has.All.TypeOf<InternalTransition>());
         }
 
         [Test]
