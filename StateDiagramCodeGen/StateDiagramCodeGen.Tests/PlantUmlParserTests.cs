@@ -303,5 +303,9 @@ namespace StateDiagramCodeGen.Tests
 
             Assert.That(diagram.Name, Is.EqualTo("Simple Diagram"));
         }
+
+        // TODO: single-line comments
+        // TODO: multi-line comments
+        // TODO: "hide empty description"
     }
 }
