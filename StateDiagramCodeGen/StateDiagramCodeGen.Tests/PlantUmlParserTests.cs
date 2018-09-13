@@ -304,6 +304,33 @@ namespace StateDiagramCodeGen.Tests
             Assert.That(diagram.Name, Is.EqualTo("Simple Diagram"));
         }
 
+        [Test]
+        public void ShouldParseDiagramWithHideEmptyDescription()
+        {
+            const string input = @"@startuml ""Simple Diagram""
+                hide empty description
+                state Off
+                state On {
+                    state Idle
+                    [*]->Idle
+                    state Responding
+                    Responding : entry / StartProcessing
+                    Responding : exit / StopProcessing
+                }
+                On : entry / EnableLed
+                On : exit / DisableLed
+                [*] -> Off
+                Off -> On : PowerToggle
+                On --> Off : PowerToggle
+                Idle --> Responding : ButtonPressed
+                Responding --> Idle : DoneProcessing
+                @enduml";
+
+            var diagram = PlantUmlParser.Diagram.End().Parse(input);
+
+            Assert.That(diagram.Name, Is.EqualTo("Simple Diagram"));
+        }
+
         // TODO: single-line comments
         // TODO: multi-line comments
         // TODO: "hide empty description"

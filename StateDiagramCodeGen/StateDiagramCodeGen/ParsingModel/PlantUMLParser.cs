@@ -186,8 +186,12 @@ namespace StateDiagramCodeGen.ParsingModel
             from end in Parse.String("@enduml").AndTrailingWhitespace()
             select "end";
 
+        private static readonly Parser<string> HideEmptyDescriptions =
+            Parse.String("hide empty description").Token().Text();
+
         public static readonly Parser<Diagram> Diagram =
             from diagramName in StartDiagram
+            from hideEmptyDescription in HideEmptyDescriptions.Optional()
             from elements in DiagramElement.Many()
             from end in EndDiagram
             select new Diagram(diagramName.GetOrElse("Unnamed"), elements);
