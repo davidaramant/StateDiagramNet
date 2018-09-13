@@ -147,12 +147,12 @@ namespace StateDiagramCodeGen.ParsingModel
             from asKeyword in Parse.String("as").AndTrailingPadding()
             select longName;
         
-        public static readonly Parser<State> State =
+        public static readonly Parser<StateDefinition> State =
             from state in Parse.String("state").AndTrailingPadding()
             from longName in LongStateName.Optional()
             from shortName in Identifier
             from children in StateChildren.Optional()
-            select new State(
+            select new StateDefinition(
                 shortName: shortName,
                 longName: longName.GetOrElse(string.Empty),
                 contents: children.GetOrElse(Enumerable.Empty<IDiagramElement>()));

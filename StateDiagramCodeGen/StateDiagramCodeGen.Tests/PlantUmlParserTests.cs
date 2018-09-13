@@ -200,7 +200,7 @@ namespace StateDiagramCodeGen.Tests
         [TestCase("Alpha: SomeEvent / Action", typeof(InternalTransition))]
         [TestCase("[*]-->Alpha", typeof(ExternalTransition))]
         [TestCase("Alpha --> Beta : Gamma", typeof(ExternalTransition))]
-        [TestCase("state Alpha", typeof(State))]
+        [TestCase("state Alpha", typeof(StateDefinition))]
         public void ShouldParseStateComponent(string input, Type expectedType)
         {
             var element = PlantUmlParser.DiagramElement.End().Parse(input);
@@ -250,7 +250,7 @@ namespace StateDiagramCodeGen.Tests
             var alphaContents = alphaState.Contents.ToList();
 
             Assert.That(alphaContents, Has.Count.EqualTo(1), "Incorrect children for Alpha");
-            Assert.That(alphaContents, Has.One.TypeOf<State>());
+            Assert.That(alphaContents, Has.One.TypeOf<StateDefinition>());
         }
 
         [Test]
@@ -267,13 +267,13 @@ namespace StateDiagramCodeGen.Tests
             var alphaContents = alphaState.Contents.ToList();
 
             Assert.That(alphaContents, Has.Count.EqualTo(1), "Incorrect children for Alpha");
-            Assert.That(alphaContents, Has.One.TypeOf<State>());
+            Assert.That(alphaContents, Has.One.TypeOf<StateDefinition>());
 
-            var betaState = (State)alphaContents.First();
+            var betaState = (StateDefinition)alphaContents.First();
             var betaContents = betaState.Contents.ToList();
 
             Assert.That(betaContents, Has.Count.EqualTo(1), "Incorrect children for Beta");
-            Assert.That(betaContents, Has.One.TypeOf<State>());
+            Assert.That(betaContents, Has.One.TypeOf<StateDefinition>());
         }
 
         #endregion States
