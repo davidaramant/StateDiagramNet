@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace StateDiagramCodeGen.MachineModel
 {
+    [DebuggerDisplay("{Name}")]
     public sealed class StateMachine : IVertex
     {
         public string Name { get; }

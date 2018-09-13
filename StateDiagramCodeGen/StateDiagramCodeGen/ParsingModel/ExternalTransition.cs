@@ -8,6 +8,8 @@
         public string GuardName { get; }
         public string ActionName { get; }
 
+        public bool IsInitialTransition => Source == Constants.Star;
+
         public ExternalTransition(
             string source, 
             string destination, 

@@ -20,9 +20,9 @@ namespace StateDiagramCodeGen.ParsingModel
             select _;
 
         private static readonly Parser<string> Star = 
-            from star in Parse.String("[*]")
+            from star in Parse.String(Constants.Star)
             from _ in SpacesOrTabs
-            select "[*]";
+            select Constants.Star;
 
         public static readonly Parser<string> Identifier =
             Parse.Identifier(Parse.Letter, Parse.LetterOrDigit).AndTrailingPadding();

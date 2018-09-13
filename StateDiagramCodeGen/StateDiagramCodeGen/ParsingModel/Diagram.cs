@@ -18,40 +18,88 @@ namespace StateDiagramCodeGen.ParsingModel
         {
             var machine = new StateMachine(Name);
 
+            var vertexLookup = new VertexLookup();
+
+            // First pass : state declarations
             foreach (var component in Components)
             {
                 switch (component)
                 {
-                    case StateDefinition state:
-                        machine.AddChild(ConvertState(machine, state));
+                    case StateDefinition stateDef:
+                        machine.AddChild(CreateState(machine, stateDef, vertexLookup));
                         break;
 
                     default:
-                        throw new InvalidStateMachineException("Component type not allowed at top level: " + component);
+                        // Ignore everything else in this pass
+                        break;
+                }
+            }
+
+            // Second pass : internal and external transitions
+            foreach (var component in Components)
+            {
+                switch (component)
+                {
+                    case StateDefinition stateDef:
+                        HandleStateComponents(stateDef, vertexLookup);
+                        break;
+
+                    
+
+                    default:
+                        // Ignore everything else in this pass
+                        break;
                 }
             }
 
             return machine;
         }
 
-        private State ConvertState(IVertex parent, StateDefinition state)
+        private State CreateState(IVertex parent, StateDefinition stateDef, VertexLookup vertexLookup)
         {
-            var modelState = new State(parent, state.ShortName);
+            var state = new State(parent, stateDef.ShortName);
+            vertexLookup.Add(state);
 
-            foreach (var component in state.Contents)
+            foreach (var component in stateDef.Contents)
             {
                 switch (component)
                 {
                     case StateDefinition childState:
-                        modelState.AddChild(ConvertState(modelState, childState));
+                        state.AddChild(CreateState(state, childState, vertexLookup));
                         break;
 
                     default:
-                        throw new InvalidStateMachineException("Component type not allowed at top level: " + component);
+                        // Ignore everything else in this pass
+                        break;
                 }
             }
 
-            return modelState;
+            return state;
+        }
+
+        private void HandleStateComponents(
+            StateDefinition stateDefinition,
+            VertexLookup lookup)
+        {
+            var state = (State)lookup[stateDefinition.ShortName];
+
+            foreach (var component in Components)
+            {
+                switch (component)
+                {
+                    case StateDefinition childStateDef:
+                        // already handled
+                        break;
+
+                    case ExternalTransition initialTrans when initialTrans.IsInitialTransition:
+                        // add initial transition
+                        break;
+
+                    default:
+                        // Ignore everything else in this pass
+                        break;
+                }
+            }
         }
     }
 }
