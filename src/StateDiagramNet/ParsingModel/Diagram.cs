@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using StateDiagramCodeGen.MachineModel;
+using StateDiagramNet.MachineModel;
 
-namespace StateDiagramCodeGen.ParsingModel
+namespace StateDiagramNet.ParsingModel
 {
     public sealed class Diagram
     {

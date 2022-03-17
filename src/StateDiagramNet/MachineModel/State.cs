@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Functional.Maybe;
 
-namespace StateDiagramCodeGen.MachineModel
+namespace StateDiagramNet.MachineModel
 {
     [DebuggerDisplay("{Name}")]
     public sealed class State : IVertex

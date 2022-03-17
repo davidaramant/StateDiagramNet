@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StateDiagramCodeGen
+namespace StateDiagramNet
 {
     public sealed class InvalidStateMachineException : Exception
     {

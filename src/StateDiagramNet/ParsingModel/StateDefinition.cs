@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace StateDiagramCodeGen.ParsingModel
+namespace StateDiagramNet.ParsingModel
 {
     public sealed class StateDefinition : IDiagramElement
     {

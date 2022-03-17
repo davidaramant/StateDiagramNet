@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace StateDiagramCodeGen.MachineModel
+namespace StateDiagramNet.MachineModel
 {
     [DebuggerDisplay("{_name}")]
     public sealed class ActionReference

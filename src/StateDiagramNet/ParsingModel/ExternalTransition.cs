@@ -1,4 +1,4 @@
-﻿namespace StateDiagramCodeGen.ParsingModel
+﻿namespace StateDiagramNet.ParsingModel
 {
     public sealed class ExternalTransition : IDiagramElement
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace StateDiagramCodeGen.ParsingModel
+namespace StateDiagramNet.ParsingModel
 {
     public sealed class InternalTransition : IDiagramElement
     {

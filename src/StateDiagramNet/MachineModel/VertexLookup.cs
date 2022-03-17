@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace StateDiagramCodeGen.MachineModel
+namespace StateDiagramNet.MachineModel
 {
     public sealed class VertexLookup
     {

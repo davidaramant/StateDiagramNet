@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using Sprache;
-using StateDiagramCodeGen.ParsingModel;
+using StateDiagramNet.ParsingModel;
 
-namespace StateDiagramCodeGen.Tests
+namespace StateDiagramNet.Tests
 {
     [TestFixture]
     public sealed class ParsingModelConversionTests
