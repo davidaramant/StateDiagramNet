@@ -1,21 +1,7 @@
-﻿using System.Collections.Generic;
+﻿namespace StateDiagramNet.ParsingModel;
 
-namespace StateDiagramNet.ParsingModel
-{
-    public sealed class StateDefinition : IDiagramElement
-    {
-        public string ShortName { get; }
-        public string LongName { get; }
-        public IEnumerable<IDiagramElement> Contents { get; }
-
-        public StateDefinition(
-            string shortName, 
-            string longName,
-            IEnumerable<IDiagramElement> contents)
-        {
-            ShortName = shortName;
-            LongName = longName;
-            Contents = contents;
-        }
-    }
-}
+public sealed record StateDefinition(
+    string ShortName,
+    string LongName,
+    IEnumerable<IDiagramElement> Contents) 
+    : IDiagramElement;
