@@ -1,7 +1,6 @@
-﻿namespace StateDiagramNet.ParsingModel
+﻿namespace StateDiagramNet.ParsingModel;
+
+public static class Constants
 {
-    public static class Constants
-    {
-        public const string Star = "[*]";
-    }
+    public const string Star = "[*]";
 }

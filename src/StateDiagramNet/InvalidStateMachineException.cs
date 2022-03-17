@@ -1,11 +1,8 @@
-﻿using System;
+﻿namespace StateDiagramNet;
 
-namespace StateDiagramNet
+public sealed class InvalidStateMachineException : Exception
 {
-    public sealed class InvalidStateMachineException : Exception
+    public InvalidStateMachineException(string message) : base(message)
     {
-        public InvalidStateMachineException(string message) : base(message)
-        {
-        }
     }
 }

@@ -1,104 +1,102 @@
-﻿using System.Collections.Generic;
-using StateDiagramNet.MachineModel;
+﻿using StateDiagramNet.MachineModel;
 
-namespace StateDiagramNet.ParsingModel
+namespace StateDiagramNet.ParsingModel;
+
+public sealed class Diagram
 {
-    public sealed class Diagram
+    public string Name { get; }
+    public IEnumerable<IDiagramElement> Components { get; }
+
+    public Diagram(string name, IEnumerable<IDiagramElement> components)
     {
-        public string Name { get; }
-        public IEnumerable<IDiagramElement> Components { get; }
+        Name = name;
+        Components = components;
+    }
 
-        public Diagram(string name, IEnumerable<IDiagramElement> components)
+    public StateMachine ToMachineModel()
+    {
+        var machine = new StateMachine(Name);
+
+        var vertexLookup = new VertexLookup();
+
+        // First pass : state declarations
+        foreach (var component in Components)
         {
-            Name = name;
-            Components = components;
+            switch (component)
+            {
+                case StateDefinition stateDef:
+                    machine.AddChild(CreateState(machine, stateDef, vertexLookup));
+                    break;
+
+                default:
+                    // Ignore everything else in this pass
+                    break;
+            }
         }
 
-        public StateMachine ToMachineModel()
+        // Second pass : internal and external transitions
+        foreach (var component in Components)
         {
-            var machine = new StateMachine(Name);
-
-            var vertexLookup = new VertexLookup();
-
-            // First pass : state declarations
-            foreach (var component in Components)
+            switch (component)
             {
-                switch (component)
-                {
-                    case StateDefinition stateDef:
-                        machine.AddChild(CreateState(machine, stateDef, vertexLookup));
-                        break;
+                case StateDefinition stateDef:
+                    HandleStateComponents(stateDef, vertexLookup);
+                    break;
 
-                    default:
-                        // Ignore everything else in this pass
-                        break;
-                }
+                
+
+                default:
+                    // Ignore everything else in this pass
+                    break;
             }
-
-            // Second pass : internal and external transitions
-            foreach (var component in Components)
-            {
-                switch (component)
-                {
-                    case StateDefinition stateDef:
-                        HandleStateComponents(stateDef, vertexLookup);
-                        break;
-
-                    
-
-                    default:
-                        // Ignore everything else in this pass
-                        break;
-                }
-            }
-
-            return machine;
         }
 
-        private State CreateState(IVertex parent, StateDefinition stateDef, VertexLookup vertexLookup)
+        return machine;
+    }
+
+    private State CreateState(IVertex parent, StateDefinition stateDef, VertexLookup vertexLookup)
+    {
+        var state = new State(parent, stateDef.ShortName);
+        vertexLookup.Add(state);
+
+        foreach (var component in stateDef.Contents)
         {
-            var state = new State(parent, stateDef.ShortName);
-            vertexLookup.Add(state);
-
-            foreach (var component in stateDef.Contents)
+            switch (component)
             {
-                switch (component)
-                {
-                    case StateDefinition childState:
-                        state.AddChild(CreateState(state, childState, vertexLookup));
-                        break;
+                case StateDefinition childState:
+                    state.AddChild(CreateState(state, childState, vertexLookup));
+                    break;
 
-                    default:
-                        // Ignore everything else in this pass
-                        break;
-                }
+                default:
+                    // Ignore everything else in this pass
+                    break;
             }
-
-            return state;
         }
 
-        private void HandleStateComponents(
-            StateDefinition stateDefinition,
-            VertexLookup lookup)
+        return state;
+    }
+
+    private void HandleStateComponents(
+        StateDefinition stateDefinition,
+        VertexLookup lookup)
+    {
+        var state = (State)lookup[stateDefinition.ShortName];
+
+        foreach (var component in Components)
         {
-            var state = (State)lookup[stateDefinition.ShortName];
-
-            foreach (var component in Components)
+            switch (component)
             {
-                switch (component)
-                {
-                    case StateDefinition childStateDef:
-                        // already handled
-                        break;
+                case StateDefinition childStateDef:
+                    // already handled
+                    break;
 
-                    case ExternalTransition initialTrans when initialTrans.IsInitialTransition:
-                        // add initial transition
-                        break;
+                case ExternalTransition initialTrans when initialTrans.IsInitialTransition:
+                    // add initial transition
+                    break;
 
-                    default:
-                        // Ignore everything else in this pass
-                        break;
-                }
+                default:
+                    // Ignore everything else in this pass
+                    break;
             }
         }
     }

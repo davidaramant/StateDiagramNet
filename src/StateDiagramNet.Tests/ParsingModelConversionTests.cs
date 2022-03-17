@@ -2,14 +2,14 @@
 using StateDiagramNet.ParsingModel;
 using Xunit;
 
-namespace StateDiagramNet.Tests
+namespace StateDiagramNet.Tests;
+
+public sealed class ParsingModelConversionTests
 {
-    public sealed class ParsingModelConversionTests
+    [Fact]
+    public void ShouldConvertStates()
     {
-        [Fact]
-        public void ShouldConvertStates()
-        {
-            const string input = @"@startuml ""Simple Diagram""
+        const string input = @"@startuml ""Simple Diagram""
                 state Off
                 state On {
                     state Idle
@@ -17,9 +17,8 @@ namespace StateDiagramNet.Tests
                 }
                 @enduml";
 
-            var diagram = PlantUmlParser.Diagram.End().Parse(input);
+        var diagram = PlantUmlParser.Diagram.End().Parse(input);
 
-            diagram.ToMachineModel();
-        }
+        diagram.ToMachineModel();
     }
 }

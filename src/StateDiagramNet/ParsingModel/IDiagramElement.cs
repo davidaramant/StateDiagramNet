@@ -1,6 +1,5 @@
-﻿namespace StateDiagramNet.ParsingModel
+﻿namespace StateDiagramNet.ParsingModel;
+
+public interface IDiagramElement
 {
-    public interface IDiagramElement
-    {
-    }
 }
