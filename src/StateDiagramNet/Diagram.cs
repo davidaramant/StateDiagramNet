@@ -1,4 +1,4 @@
-﻿namespace StateDiagramNet.ParsingModel;
+﻿namespace StateDiagramNet;
 
 public sealed class Diagram
 {
@@ -9,5 +9,5 @@ public sealed class Diagram
     {
         Name = name;
         Components = components;
-    }   
+    }
 }

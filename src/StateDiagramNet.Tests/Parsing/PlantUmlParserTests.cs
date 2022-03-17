@@ -1,11 +1,11 @@
 ﻿using FluentAssertions;
 using Sprache;
-using StateDiagramNet.ParsingModel;
+using StateDiagramNet.Parsing;
 using System;
 using System.Linq;
 using Xunit;
 
-namespace StateDiagramNet.Tests;
+namespace StateDiagramNet.Tests.Parsing;
 
 public sealed class PlantUmlParserTests
 {

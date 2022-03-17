@@ -1,7 +1,7 @@
-﻿namespace StateDiagramNet.ParsingModel;
+﻿namespace StateDiagramNet;
 
 public sealed record StateDefinition(
     string ShortName,
     string LongName,
-    IEnumerable<IDiagramElement> Contents) 
+    IEnumerable<IDiagramElement> Contents)
     : IDiagramElement;

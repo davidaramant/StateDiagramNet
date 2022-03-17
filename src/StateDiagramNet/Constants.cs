@@ -1,4 +1,4 @@
-﻿namespace StateDiagramNet.ParsingModel;
+﻿namespace StateDiagramNet;
 
 public static class Constants
 {

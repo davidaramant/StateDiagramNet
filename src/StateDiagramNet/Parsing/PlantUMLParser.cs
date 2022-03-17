@@ -1,7 +1,7 @@
 ﻿using Humanizer;
 using Sprache;
 
-namespace StateDiagramNet.ParsingModel;
+namespace StateDiagramNet.Parsing;
 
 public static class PlantUmlParser
 {
@@ -17,14 +17,14 @@ public static class PlantUmlParser
         from trailing in Parse.WhiteSpace.Many()
         select _;
 
-    private static readonly Parser<string> Star = 
+    private static readonly Parser<string> Star =
         from star in Parse.String(Constants.Star)
         from _ in SpacesOrTabs
         select Constants.Star;
 
     public static readonly Parser<string> Identifier =
         Parse.Identifier(Parse.Letter, Parse.LetterOrDigit).AndTrailingPadding();
-    
+
     public static readonly Parser<string> DehumanizedSentence =
         from sentence in Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Text().Token()
         from _ in SpacesOrTabs
@@ -56,7 +56,7 @@ public static class PlantUmlParser
 
     private static Parser<char> CharWithTrailingPadding(char c) => Parse.Char(c).AndTrailingPadding();
     private static Parser<char> CharWithTrailingWhitespace(char c) => Parse.Char(c).AndTrailingWhitespace();
-    
+
     private static readonly Parser<string> Guard =
         from openGuard in CharWithTrailingPadding('[')
         from guard in FriendlyMethodReference
@@ -144,7 +144,7 @@ public static class PlantUmlParser
         from longName in QuotedString.AndTrailingPadding()
         from asKeyword in Parse.String("as").AndTrailingPadding()
         select longName;
-    
+
     public static readonly Parser<StateDefinition> State =
         from state in Parse.String("state").AndTrailingPadding()
         from longName in LongStateName.Optional()
@@ -180,7 +180,7 @@ public static class PlantUmlParser
         from trailing in Parse.WhiteSpace.Many()
         select name;
 
-    static readonly Parser<string> EndDiagram = 
+    static readonly Parser<string> EndDiagram =
         from end in Parse.String("@enduml").AndTrailingWhitespace()
         select "end";
 

@@ -1,8 +1,8 @@
-﻿namespace StateDiagramNet.ParsingModel;
+﻿namespace StateDiagramNet;
 
 public sealed record InternalTransition(
     string Source,
     string EventName,
     string GuardName,
-    string ActionName) 
+    string ActionName)
     : IDiagramElement;
