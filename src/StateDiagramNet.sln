@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StateDiagramCodeGen", "StateDiagramCodeGen\StateDiagramCodeGen.csproj", "{FD119562-5E20-408D-ACFA-172E7DC00882}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StateDiagramNet", "StateDiagramNet\StateDiagramNet.csproj", "{FD119562-5E20-408D-ACFA-172E7DC00882}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StateDiagramCodeGen.Tests", "StateDiagramCodeGen.Tests\StateDiagramCodeGen.Tests.csproj", "{367DA480-68A5-49EF-AAE6-CC09E4A613FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StateDiagramNet.Tests", "StateDiagramNet.Tests\StateDiagramNet.Tests.csproj", "{367DA480-68A5-49EF-AAE6-CC09E4A613FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
