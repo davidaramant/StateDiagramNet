@@ -1,13 +1,12 @@
-﻿using NUnit.Framework;
-using Sprache;
+﻿using Sprache;
 using StateDiagramNet.ParsingModel;
+using Xunit;
 
 namespace StateDiagramNet.Tests
 {
-    [TestFixture]
     public sealed class ParsingModelConversionTests
     {
-        [Test]
+        [Fact]
         public void ShouldConvertStates()
         {
             const string input = @"@startuml ""Simple Diagram""
@@ -20,7 +19,7 @@ namespace StateDiagramNet.Tests
 
             var diagram = PlantUmlParser.Diagram.End().Parse(input);
 
-            Assert.DoesNotThrow(() => { var machine = diagram.ToMachineModel(); });
+            diagram.ToMachineModel();
         }
     }
 }

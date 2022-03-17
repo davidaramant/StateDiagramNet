@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using Functional.Maybe;
+﻿using System.Diagnostics;
 
 namespace StateDiagramNet.MachineModel
 {
