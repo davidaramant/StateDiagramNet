@@ -1,4 +1,5 @@
 ﻿using Sprache;
+using StateDiagramNet.PlantUmlModel;
 
 namespace StateDiagramNet.IO;
 public static class PlantUmlReader
@@ -23,8 +24,19 @@ public static class PlantUmlReader
     internal static readonly Parser<string> Identifier =
         Parse.Identifier(Parse.Letter, Parse.LetterOrDigit).AndTrailingPadding();
 
+    private static readonly Parser<string> StateName =
+        Star.Or(Identifier);
+
     private static readonly Parser<string> QuotedString =
         Parse.LetterOrDigit.Or(Parse.Char(' ')).Many().Contained(Parse.Char('"'), Parse.Char('"')).Text();
+
+    private static Parser<char> CharWithTrailingPadding(char c) => Parse.Char(c).AndTrailingPadding();
+
+    private static readonly Parser<string> Description =
+        from colon in CharWithTrailingPadding(':')
+        from description in Parse.AnyChar.Many().Text()
+        select description;
+
 
     internal static readonly Parser<string> Arrow =
         from qualifier in
@@ -41,6 +53,16 @@ public static class PlantUmlReader
         from end in Parse.String(">")
         from _ in SpacesOrTabs
         select "->";
+
+    internal static readonly Parser<TransitionDefinition> Transition =
+        from source in StateName
+        from arrow in Arrow
+        from destination in StateName
+        from description in Description.Optional()
+        select new TransitionDefinition(
+            Source: source,
+            Destination: destination,
+            Description: description.GetOrDefault());
 
     internal static readonly Parser<IOption<string>> StartDiagram =
         from start in Parse.String("@startuml").AndTrailingWhitespace()
