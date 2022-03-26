@@ -64,6 +64,13 @@ public static class PlantUmlReader
             Destination: destination,
             Description: description.GetOrDefault());
 
+    internal static readonly Parser<StateDescription> StateDescription =
+        from state in StateName
+        from description in Description
+        select new StateDescription(
+            StateName: state, 
+            Description: description);
+
     internal static readonly Parser<IOption<string>> StartDiagram =
         from start in Parse.String("@startuml").AndTrailingWhitespace()
         from name in QuotedString.Optional()

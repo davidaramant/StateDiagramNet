@@ -48,6 +48,17 @@ public sealed class PlantUmlReaderTests
     }
 
     [Theory]
+    [InlineData("Alpha:Description")]
+    [InlineData("Alpha : Description")]
+    public void ShouldParseStateDescription(string text)
+    {
+        var description = PlantUmlReader.StateDescription.Parse(text);
+        description.StateName.Should().Be("Alpha");
+        description.Description.Should().Be("Description");
+    }
+    
+
+    [Theory]
     [InlineData("@startuml \"Simple Diagram\"", "Simple Diagram")]
     [InlineData("@startuml", null)]
     public void ShouldParseStartDiagram(string text, string? expectedName)
