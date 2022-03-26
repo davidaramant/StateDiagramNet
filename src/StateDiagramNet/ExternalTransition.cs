@@ -6,7 +6,7 @@ public sealed record ExternalTransition(
     string EventName,
     string GuardName,
     string ActionName)
-    : IDiagramElement
+    : IDiagramElementOld
 {
     public bool IsInitialTransition => Source == Constants.Star;
 }

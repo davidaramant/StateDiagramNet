@@ -213,7 +213,7 @@ public sealed class PlantUmlParserTests
     [InlineData("Alpha: SomeEvent / Action", typeof(InternalTransition))]
     [InlineData("[*]-->Alpha", typeof(ExternalTransition))]
     [InlineData("Alpha --> Beta : Gamma", typeof(ExternalTransition))]
-    [InlineData("state Alpha", typeof(StateDefinition))]
+    [InlineData("state Alpha", typeof(StateDefinitionOld))]
     public void ShouldParseStateComponent(string input, Type expectedType)
     {
         var element = PlantUmlParser.DiagramElement.End().Parse(input);
@@ -260,7 +260,7 @@ public sealed class PlantUmlParserTests
 
         var alphaContents = alphaState.Contents.ToList();
 
-        alphaContents.Should().HaveCount(1).And.AllBeOfType<StateDefinition>();
+        alphaContents.Should().HaveCount(1).And.AllBeOfType<StateDefinitionOld>();
     }
 
     [Fact]
@@ -276,12 +276,12 @@ public sealed class PlantUmlParserTests
 
         var alphaContents = alphaState.Contents.ToList();
 
-        alphaContents.Should().HaveCount(1).And.AllBeOfType<StateDefinition>();
+        alphaContents.Should().HaveCount(1).And.AllBeOfType<StateDefinitionOld>();
 
-        var betaState = (StateDefinition)alphaContents.First();
+        var betaState = (StateDefinitionOld)alphaContents.First();
         var betaContents = betaState.Contents.ToList();
 
-        betaContents.Should().HaveCount(1).And.AllBeOfType<StateDefinition>();
+        betaContents.Should().HaveCount(1).And.AllBeOfType<StateDefinitionOld>();
     }
 
     #endregion States

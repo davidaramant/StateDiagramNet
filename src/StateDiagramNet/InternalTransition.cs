@@ -5,4 +5,4 @@ public sealed record InternalTransition(
     string EventName,
     string GuardName,
     string ActionName)
-    : IDiagramElement;
+    : IDiagramElementOld;

@@ -145,28 +145,28 @@ public static class PlantUmlParser
         from asKeyword in Parse.String("as").AndTrailingPadding()
         select longName;
 
-    public static readonly Parser<StateDefinition> State =
+    public static readonly Parser<StateDefinitionOld> State =
         from state in Parse.String("state").AndTrailingPadding()
         from longName in LongStateName.Optional()
         from shortName in Identifier
         from children in StateChildren.Optional()
-        select new StateDefinition(
+        select new StateDefinitionOld(
             ShortName: shortName,
             LongName: longName.GetOrElse(string.Empty),
-            Contents: children.GetOrElse(Enumerable.Empty<IDiagramElement>()));
+            Contents: children.GetOrElse(Enumerable.Empty<IDiagramElementOld>()));
 
-    private static readonly Parser<IDiagramElement> StateDiagramElement =
+    private static readonly Parser<IDiagramElementOld> StateDiagramElement =
         from state in State
-        select (IDiagramElement)state;
+        select (IDiagramElementOld)state;
 
-    public static readonly Parser<IDiagramElement> DiagramElement =
+    public static readonly Parser<IDiagramElementOld> DiagramElement =
         from element in StateDiagramElement
             .Or(InternalTransition)
             .Or(ExternalTransition)
         from trailing in Parse.WhiteSpace.Many()
         select element;
 
-    public static readonly Parser<IEnumerable<IDiagramElement>> StateChildren =
+    public static readonly Parser<IEnumerable<IDiagramElementOld>> StateChildren =
         from openParen in CharWithTrailingWhitespace('{')
         from children in DiagramElement.Many()
         from closeParen in CharWithTrailingWhitespace('}')
